@@ -1,0 +1,9 @@
+# DB Files and Logs:
+
+*.duckdb
+*.duckdb.wal
+logs/
+*.log
+
+.parquet
+dbt/target/
