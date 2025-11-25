@@ -4,7 +4,6 @@ import duckdb
 import pandas as pd
 import time
 from datetime import datetime
-import logging
 import os
 
 # Initializing Alerce client:
@@ -12,20 +11,6 @@ client = Alerce()
 DB_NAME = "universe.duckdb" # Local DuckDB database file
 TARGET_RECORDS = 100000 # Setting data record target
 
-# Making log directory if it doesn't exist:
-os.makedirs('logs', exist_ok=True)
-
-# Defining logger: To track progress and issues as scripts run
-logging.basicConfig(
-    level=logging.INFO, 
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/load.log'),  # Save to file
-        logging.StreamHandler()                # Print to console
-    ]
-)
-
-logger = logging.getLogger(__name__)
 
 # == TASKS ==
 # 1) Initializing DuckDB Database:
@@ -59,9 +44,9 @@ def init_db():
     processed = con.execute("SELECT COUNT(*) FROM processed_candidates").fetchone()[0]
     con.close()
     
-    # Log initialization results:
-    logger.info("Database initialized successfully.")
-    logger.info(f"Current record count: {count:,}, Processed candidates: {processed:,}")
+    # printing initialization results:
+    print("Database initialized successfully.")
+    print(f"Current record count: {count:,}, Processed candidates: {processed:,}")
     
     return count, processed
 
@@ -74,13 +59,13 @@ def get_processed_oids():
     result = con.execute("SELECT oid FROM processed_candidates").fetchall()
     con.close()
     oid_set = set(row[0] for row in result)
-    logger.info(f"Loaded {len(oid_set):,} previously processed OIDs")
+    print(f"Loaded {len(oid_set):,} previously processed OIDs")
     return oid_set
 
 @task(name="Fetch Batch")
 def fetch_batch(page_number, processed_oids):
     """Fetches one page of Supernovae and their light curves."""
-    logger.info(f"Fetching page {page_number}...")
+    print(f"Fetching page {page_number}...")
     
     try:
         # Get Candidates with better filters
@@ -95,17 +80,17 @@ def fetch_batch(page_number, processed_oids):
         )
         
         if candidates.empty:
-            logger.warning(f"Page {page_number}: No candidates returned")
+            print(f"Page {page_number}: No candidates returned")
             return pd.DataFrame(), []
         
         # Filter out already processed
         new_candidates = candidates[~candidates['oid'].isin(processed_oids)]
         
         if new_candidates.empty:
-            logger.warning(f"Page {page_number}: All candidates already processed")
+            print(f"Page {page_number}: All candidates already processed")
             return pd.DataFrame(), []
         
-        logger.info(f"Page {page_number}: Found {len(new_candidates)} new candidates")
+        print(f"Page {page_number}: Found {len(new_candidates)} new candidates")
         
         # Get Detections
         batch_detections = []
@@ -133,19 +118,19 @@ def fetch_batch(page_number, processed_oids):
                     processed_oids_batch.append(oid)
                     
             except Exception as e:
-                logger.error(f"Error fetching {oid}: {e}")
+                print(f"Error fetching {oid}: {e}")
                 continue
         
         if batch_detections:
             result_df = pd.concat(batch_detections, ignore_index=True)
-            logger.info(f"Page {page_number}: Retrieved {len(result_df)} detections from {len(processed_oids_batch)} objects")
+            print(f"Page {page_number}: Retrieved {len(result_df)} detections from {len(processed_oids_batch)} objects")
             return result_df, processed_oids_batch
         else:
-            logger.warning(f"Page {page_number}: No detections retrieved")
+            print(f"Page {page_number}: No detections retrieved")
             return pd.DataFrame(), []
             
     except Exception as e:
-        logger.error(f"Page {page_number}: Batch fetch failed - {e}")
+        print(f"Page {page_number}: Batch fetch failed - {e}")
         return pd.DataFrame(), []
 
 @task(name="Save to DuckDB")
@@ -170,10 +155,10 @@ def save_batch(df, processed_oids):
         
         # Get new total
         total = con.execute("SELECT COUNT(*) FROM supernovae").fetchone()[0]
-        logger.info(f"Saved {len(df)} detections. Total records: {total:,}")
+        print(f"Saved {len(df)} detections. Total records: {total:,}")
         
     except Exception as e:
-        logger.error(f"Save failed: {e}")
+        print(f"Save failed: {e}")
         total = 0
     finally:
         con.close()
@@ -193,12 +178,12 @@ def start_harvest():
     empty_pages = 0
     max_empty_pages = 5  # Stop after 5 consecutive empty pages
     
-    logger.info("="*60)
-    logger.info("Starting supernova data harvest...")
-    logger.info(f"Target: {TARGET_RECORDS:,} detection records")
-    logger.info(f"Current: {current_count:,} records")
-    logger.info(f"Already processed: {processed_count:,} candidates")
-    logger.info("="*60)
+    print("="*60)
+    print("Starting supernova data harvest...")
+    print(f"Target: {TARGET_RECORDS:,} detection records")
+    print(f"Current: {current_count:,} records")
+    print(f"Already processed: {processed_count:,} candidates")
+    print("="*60)
     
     start_time = time.time()
     
@@ -215,15 +200,15 @@ def start_harvest():
             elapsed = time.time() - start_time
             rate = current_count / elapsed if elapsed > 0 else 0
             
-            logger.info(f"Progress: {current_count:,}/{TARGET_RECORDS:,} ({progress:.1f}%) | Rate: {rate:.0f} records/sec")
+            print(f"Progress: {current_count:,}/{TARGET_RECORDS:,} ({progress:.1f}%) | Rate: {rate:.0f} records/sec")
             
             empty_pages = 0  # Reset counter
         else:
             empty_pages += 1
-            logger.warning(f"Empty batch ({empty_pages}/{max_empty_pages})")
+            print(f"Empty batch ({empty_pages}/{max_empty_pages})")
             
             if empty_pages >= max_empty_pages:
-                logger.warning("Stopping: Too many consecutive empty pages")
+                print("Stopping: Too many consecutive empty pages")
                 break
         
         # Increment and rate limit
@@ -231,11 +216,11 @@ def start_harvest():
         time.sleep(3.0)  # Sleep timer to handle throttling
     
     elapsed_total = time.time() - start_time
-    logger.info("="*60)
-    logger.info(f"DATA INGESTION COMPLETE!")
-    logger.info(f"Final count: {current_count:,} records")
-    logger.info(f"Total time: {elapsed_total/60:.1f} minutes")
-    logger.info("="*60)
+    print("="*60)
+    print(f"DATA INGESTION COMPLETE!")
+    print(f"Final count: {current_count:,} records")
+    print(f"Total time: {elapsed_total/60:.1f} minutes")
+    print("="*60)
 
 if __name__ == "__main__":
     start_harvest()
