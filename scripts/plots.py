@@ -1,5 +1,6 @@
 import duckdb
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns 
 import matplotlib
@@ -18,8 +19,9 @@ matplotlib.rcParams["font.family"] = 'Times New Roman'
 # ==========================================
 print("Generating Sky Map...")
 
-# Figure size:
-plt.figure(figsize=(12, 6))
+# Figure size: (choosing mollweide projection for full-sky view)
+plt.figure(figsize=(12, 7))
+ax = plt.subplot(111, projection="mollweide")
 
 # -- DATA PREPARATION --
 
@@ -31,19 +33,14 @@ map_query = """
 df_map = con.execute(map_query).df()
 
 # shifting RA so the map centers correctly (0-360 -> -180 to 180)
-df_map['ra_shifted'] = df_map['ra'].apply(lambda x: x - 360 if x > 180 else x)
+# need to convert to radians for mollweide projection
+ra_rad = (df_map['ra'] - 180) * np.pi / 180
+dec_rad = df_map['dec'] * np.pi / 180
 
 # PLOTTING MAP (PLOT 1): 
 
 # Scatter Plot:
-plt.scatter(
-    df_map['ra_shifted'], # x values
-    df_map['dec'], # y values
-    alpha=0.5, 
-    s=10, # size of points
-    c='teal', 
-    edgecolor='none'
-)
+ax.scatter(ra_rad, dec_rad, s=5, alpha=0.6, color='#E74C3C', lw=0)
 
 # FORMATTING:
 plt.title(f"ZTF Survey Footprint ({len(df_map)} Objects)", fontsize=16, weight='bold')
@@ -51,10 +48,10 @@ plt.xlabel("Right Ascension (shifted)", fontsize=12, weight='bold')
 plt.ylabel("Declination", fontsize=12, weight='bold')
 plt.grid(True, linestyle='--', alpha=0.3)
 
-# Remove unnecessary spines
-plt.gca().spines['top'].set_visible(False)
-plt.gca().spines['right'].set_visible(False)
-plt.gca().spines['left'].set_visible(False)
+# The telescope is in the Northern Hemisphere (California), so it can't see the South Pole!
+plt.text(0, -1.2, "Cannot see Southern Hemisphere Stars \n(Earth is in the way)", 
+         horizontalalignment='center', fontsize=9, style='italic', color='gray')
+
 
 # saving figure as file in an output folder:
 os.makedirs("outputs", exist_ok=True)
