@@ -26,12 +26,14 @@ Offer a brief analysis of the data with your findings. Keep it to one brief, cle
 
 By mapping the right ascension (RA) and the declination (Dec) from the collected observations, I was able to visualize the physical span of the telescope's survey area. The analysis revealed that the ZTF survey covers a significant portion of the northern sky, with a dense concentration of observations in specific regions. As a result the observations recorded are not reflective of the actual distribution of astronomical objects in the universe, but rather the areas where the telescope was directed. This highlights the importance of understanding observational biases when interpreting astronomical data.
 
-![Galactic Map](outputs/galactic_map.png)
+![Galactic Map](galactic_map.png)
 
 
 ## Plot / Visualization
 
 Include at least one compelling plot or visualization of your work. Add images in your subdirectory and then display them using markdown in your README.md file.
+
+![Light Curve Example](light_curve.png)
 
 ## GitHub Repository
 

@@ -59,6 +59,7 @@ gm_plot_filename = 'outputs/galactic_map.png'
 plt.savefig(gm_plot_filename, dpi=300)
 print(f"Saved 'galactic_map.png' to {gm_plot_filename}")
 
+
 # ==========================================
 # PLOT 2: THE LIGHT CURVE
 # ==========================================
@@ -118,10 +119,10 @@ if not df_curve.empty:
     plt.gca().spines['left'].set_visible(False)
         
     # saving graph:
-
     lc_plot_filename = "outputs/light_curve.png"
     plt.savefig(lc_plot_filename, dpi=300)
     print(f"Saved 'light_curve.png' to {lc_plot_filename}")
+
 else:
     print(f"Error: No data found for {target_oid}")
 
