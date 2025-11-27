@@ -37,7 +37,7 @@ Include at least one compelling plot or visualization of your work. Add images i
 
 ## GitHub Repository
 
-https://github.com/uvasds-systems/ds3022-data-project-3
+https://github.com/yuthimreddy/DP3_Findings-Workspace
 
 
 [def]: image.png
