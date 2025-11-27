@@ -18,7 +18,7 @@ What challenges did this data choice present in data gathering, processing and a
 
 - **Object Observation vs Detections**: The main challenge was distinguishing between unique astronomical objects and their multiple detections over time. Each object can have numerous observations, leading to a complex dataset. To address this, I structured the database to separate object metadata from detection records, ensuring clarity in data relationships.
 
-- **Idempotency**: Wanted to ensure that we could stop and restart the data gathering process without duplicating records. To address this, I utilized the 'INSERT OR IGNORE' command in SQLite to prevent duplicate entries based on unique constraints such as the object ID and detection timestamp.
+- **Idempotency**: Another key challenge was ensuring that we could stop and restart the data gathering process without duplicating records. To address this, I utilized the 'INSERT OR IGNORE' command in SQLite to prevent duplicate entries based on unique constraints such as the object ID and detection timestamp.
 
 ## Analysis
 
