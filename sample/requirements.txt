@@ -1,0 +1,7 @@
+prefect
+duckdb
+pandas
+alerce
+matplotlib
+seaborn
+numpy

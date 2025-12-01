@@ -21,9 +21,6 @@ What challenges did this data choice present in data gathering, processing and a
 - **Idempotency**: Another key challenge was ensuring that we could stop and restart the data gathering process without duplicating records. To address this, I utilized the 'INSERT OR IGNORE' command in SQLite to prevent duplicate entries based on unique constraints such as the object ID and detection timestamp.
 
 ## Analysis
-
-Offer a brief analysis of the data with your findings. Keep it to one brief, clear, and meaningful paragraph.
-
 By mapping the right ascension (RA) and the declination (Dec) from the collected observations, I was able to visualize the physical span of the telescope's survey area. The analysis revealed that the ZTF survey covers a significant portion of the northern sky, with a dense concentration of observations in specific regions. As a result the observations recorded are not reflective of the actual distribution of astronomical objects in the universe, but rather the areas where the telescope was directed. This highlights the importance of understanding observational biases when interpreting astronomical data.
 
 ![Galactic Map](galactic_map.png)
@@ -31,7 +28,8 @@ By mapping the right ascension (RA) and the declination (Dec) from the collected
 
 ## Plot / Visualization
 
-Include at least one compelling plot or visualization of your work. Add images in your subdirectory and then display them using markdown in your README.md file.
+Here we have a graph of a light curve for the supernova ZTF24aaaisai. We can see that the initial point is relatively dim but indicative of an explosion starting (indicated by the green filter dot). The green references to the filter used during the observation, which in this case is the 'g' filter (green light). Different filters can provide insights into various aspects of the supernova's behavior and properties. Green indicates that the observations are higher in energy compared to its red counterpart. We see that the first point is relatively dim but then the following observations begin climbing, meaning that the explosion is getting brighter and releasing more energy. The supernova peaks at a brightness of -19.15. Then, the line begins decreasing consistently ending around a magnitude of -19.42, demonstrating that the star is cooling down and getting dimmer as the ejected material expands and cools. 
+
 
 ![Light Curve Example](light_curve.png)
 
